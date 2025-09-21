@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Scientific Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab.active {
+            background: white;
+            color: #4CAF50;
+            border-bottom: 3px solid #4CAF50;
+        }
+
+        .tab:hover {
+            background: #e8f5e8;
+        }
+
+        .tab-content {
+            padding: 30px;
+            min-height: 600px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .display {
+            width: 100%;
+            height: 80px;
+            font-size: 24px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: right;
+            background: #f9f9f9;
+            font-family: 'Courier New', monospace;
+            resize: none;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-number {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .btn-operator {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .btn-function {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .btn-equals {
+            background: #4CAF50;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .btn-clear {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .converter-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .converter-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .conversion-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .input-group select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-top: 5px;
+            background: white;
+        }
+
+        .swap-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .history {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .history-item {
+            padding: 8px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .matrix-input {
+            display: grid;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .matrix-cell {
+            width: 60px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Advanced Scientific Calculator</h1>
+            <p>Complete mathematical solution for all your calculation needs</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('calculator')">Calculator</button>
+            <button class="tab" onclick="showTab('converter')">Unit Converter</button>
+            <button class="tab" onclick="showTab('currency')">Currency</button>
+            <button class="tab" onclick="showTab('matrix')">Matrix</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Calculator Tab -->
+            <div id="calculator" class="tab-panel active">
+                <textarea id="display" class="display" placeholder="Enter your calculation..." rows="3"></textarea>
+                
+                <div class="calculator-grid">
+                    <!-- Row 1 -->
+                    <button class="btn btn-clear" onclick="clearDisplay()">Clear</button>
+                    <button class="btn btn-clear" onclick="deleteLast()">⌫</button>
+                    <button class="btn btn-function" onclick="addToDisplay('(')">(</button>
+                    <button class="btn btn-function" onclick="addToDisplay(')')">)</button>
+                    <button class="btn btn-operator" onclick="addToDisplay('/')">/</button>
+
+                    <!-- Row 2 -->
+                    <button class="btn btn-function" onclick="addToDisplay('sin(')">sin</button>
+                    <button class="btn btn-number" onclick="addToDisplay('7')">7</button>
+                    <button class="btn btn-number" onclick="addToDisplay('8')">8</button>
+                    <button class="btn btn-number" onclick="addToDisplay('9')">9</button>
+                    <button class="btn btn-operator" onclick="addToDisplay('*')">×</button>
+
+                    <!-- Row 3 -->
+                    <button class="btn btn-function" onclick="addToDisplay('cos(')">cos</button>
+                    <button class="btn btn-number" onclick="addToDisplay('4')">4</button>
+                    <button class="btn btn-number" onclick="addToDisplay('5')">5</button>
+                    <button class="btn btn-number" onclick="addToDisplay('6')">6</button>
+                    <button class="btn btn-operator" onclick="addToDisplay('-')">-</button>
+
+                    <!-- Row 4 -->
+                    <button class="btn btn-function" onclick="addToDisplay('tan(')">tan</button>
+                    <button class="btn btn-number" onclick="addToDisplay('1')">1</button>
+                    <button class="btn btn-number" onclick="addToDisplay('2')">2</button>
+                    <button class="btn btn-number" onclick="addToDisplay('3')">3</button>
+                    <button class="btn btn-operator" onclick="addToDisplay('+')">+</button>
+
+                    <!-- Row 5 -->
+                    <button class="btn btn-function" onclick="addToDisplay('log(')">log</button>
+                    <button class="btn btn-number" onclick="addToDisplay('0')">0</button>
+                    <button class="btn btn-number" onclick="addToDisplay('.')">.</button>
+                    <button class="btn btn-function" onclick="addToDisplay('pi')">π</button>
+                    <button class="btn btn-equals" onclick="calculate()">=</button>
+
+                    <!-- Row 6 -->
+                    <button class="btn btn-function" onclick="addToDisplay('ln(')">ln</button>
+                    <button class="btn btn-function" onclick="addToDisplay('sqrt(')">√</button>
+                    <button class="btn btn-function" onclick="addToDisplay('^')">x^y</button>
+                    <button class="btn btn-function" onclick="addToDisplay('e')">e</button>
+                    <button class="btn btn-function" onclick="addToDisplay('!')">x!</button>
+                </div>
+
+                <div class="history">
+                    <h4>History</h4>
+                    <div id="history-list"></div>
+                </div>
+            </div>
+
+            <!-- Unit Converter Tab -->
+            <div id="converter" class="tab-panel">
+                <div class="converter-section">
+                    <h3>Length Converter</h3>
+                    <div class="conversion-grid">
+                        <div class="input-group">
+                            <input type="number" id="length-from" placeholder="Enter value">
+                            <select id="length-from-unit">
+                                <option value="m">Meters</option>
+                                <option value="km">Kilometers</option>
+                                <option value="cm">Centimeters</option>
+                                <option value="mm">Millimeters</option>
+                                <option value="in">Inches</option>
+                                <option value="ft">Feet</option>
+                                <option value="yd">Yards</option>
+                                <option value="mi">Miles</option>
+                            </select>
+                        </div>
+                        <button class="swap-btn" onclick="swapUnits('length')">⇄</button>
+                        <div class="input-group">
+                            <input type="number" id="length-to" readonly>
+                            <select id="length-to-unit">
+                                <option value="ft">Feet</option>
+                                <option value="m">Meters</option>
+                                <option value="km">Kilometers</option>
+                                <option value="cm">Centimeters</option>
+                                <option value="mm">Millimeters</option>
+                                <option value="in">Inches</option>
+                                <option value="yd">Yards</option>
+                                <option value="mi">Miles</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="converter-section">
+                    <h3>Weight Converter</h3>
+                    <div class="conversion-grid">
+                        <div class="input-group">
+                            <input type="number" id="weight-from" placeholder="Enter value">
+                            <select id="weight-from-unit">
+                                <option value="kg">Kilograms</option>
+                                <option value="g">Grams</option>
+                                <option value="lb">Pounds</option>
+                                <option value="oz">Ounces</option>
+                                <option value="ton">Tons</option>
+                            </select>
+                        </div>
+                        <button class="swap-btn" onclick="swapUnits('weight')">⇄</button>
+                        <div class="input-group">
+                            <input type="number" id="weight-to" readonly>
+                            <select id="weight-to-unit">
+                                <option value="lb">Pounds</option>
+                                <option value="kg">Kilograms</option>
+                                <option value="g">Grams</option>
+                                <option value="oz">Ounces</option>
+                                <option value="ton">Tons</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="converter-section">
+                    <h3>Temperature Converter</h3>
+                    <div class="conversion-grid">
+                        <div class="input-group">
+                            <input type="number" id="temp-from" placeholder="Enter value">
+                            <select id="temp-from-unit">
+                                <option value="c">Celsius</option>
+                                <option value="f">Fahrenheit</option>
+                                <option value="k">Kelvin</option>
+                            </select>
+                        </div>
+                        <button class="swap-btn" onclick="swapUnits('temp')">⇄</button>
+                        <div class="input-group">
+                            <input type="number" id="temp-to" readonly>
+                            <select id="temp-to-unit">
+                                <option value="f">Fahrenheit</option>
+                                <option value="c">Celsius</option>
+                                <option value="k">Kelvin</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Currency Tab -->
+            <div id="currency" class="tab-panel">
+                <div class="converter-section">
+                    <h3>Currency Converter</h3>
+                    <div class="conversion-grid">
+                        <div class="input-group">
+                            <input type="number" id="currency-from" placeholder="Enter amount">
+                            <select id="currency-from-unit">
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="JPY">JPY - Japanese Yen</option>
+                                <option value="CNY">CNY - Chinese Yuan</option>
+                                <option value="INR">INR - Indian Rupee</option>
+                                <option value="CAD">CAD - Canadian Dollar</option>
+                                <option value="AUD">AUD - Australian Dollar</option>
+                            </select>
+                        </div>
+                        <button class="swap-btn" onclick="swapUnits('currency')">⇄</button>
+                        <div class="input-group">
+                            <input type="number" id="currency-to" readonly>
+                            <select id="currency-to-unit">
+                                <option value="INR">INR - Indian Rupee</option>
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="JPY">JPY - Japanese Yen</option>
+                                <option value="CNY">CNY - Chinese Yuan</option>
+                                <option value="CAD">CAD - Canadian Dollar</option>
+                                <option value="AUD">AUD - Australian Dollar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="error" id="currency-error" style="display: none;"></div>
+                    <p><small>Note: Currency rates are approximate and for demonstration purposes.</small></p>
+                </div>
+            </div>
+
+            <!-- Matrix Tab -->
+            <div id="matrix" class="tab-panel">
+                <div class="converter-section">
+                    <h3>Matrix Calculator</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4>Matrix A</h4>
+                            <div>
+                                Size: <select id="matrix-a-rows" onchange="createMatrix('a')">
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select> x 
+                                <select id="matrix-a-cols" onchange="createMatrix('a')">
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                            <div id="matrix-a" class="matrix-input"></div>
+                        </div>
+                        <div>
+                            <h4>Matrix B</h4>
+                            <div>
+                                Size: <select id="matrix-b-rows" onchange="createMatrix('b')">
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select> x 
+                                <select id="matrix-b-cols" onchange="createMatrix('b')">
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                            <div id="matrix-b" class="matrix-input"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 20px 0; text-align: center;">
+                        <button class="btn btn-function" onclick="matrixOperation('add')">A + B</button>
+                        <button class="btn btn-function" onclick="matrixOperation('subtract')">A - B</button>
+                        <button class="btn btn-function" onclick="matrixOperation('multiply')">A × B</button>
+                        <button class="btn btn-function" onclick="matrixOperation('determinant')">Det(A)</button>
+                    </div>
+                    <div>
+                        <h4>Result</h4>
+                        <div id="matrix-result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Calculator functionality
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function addToDisplay(value) {
+            const display = document.getElementById('display');
+            display.value += value;
+        }
+
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+
+        function deleteLast() {
+            const display = document.getElementById('display');
+            display.value = display.value.slice(0, -1);
+        }
+
+        function calculate() {
+            const display = document.getElementById('display');
+            let expression = display.value;
+            
+            try {
+                // Replace mathematical constants and functions
+                expression = expression.replace(/pi/g, Math.PI);
+                expression = expression.replace(/e/g, Math.E);
+                expression = expression.replace(/sin\(/g, 'Math.sin(');
+                expression = expression.replace(/cos\(/g, 'Math.cos(');
+                expression = expression.replace(/tan\(/g, 'Math.tan(');
+                expression = expression.replace(/log\(/g, 'Math.log10(');
+                expression = expression.replace(/ln\(/g, 'Math.log(');
+                expression = expression.replace(/sqrt\(/g, 'Math.sqrt(');
+                expression = expression.replace(/\^/g, '**');
+                
+                // Handle factorial
+                expression = expression.replace(/(\d+)!/g, (match, num) => {
+                    let n = parseInt(num);
+                    let factorial = 1;
+                    for (let i = 2; i <= n; i++) {
+                        factorial *= i;
+                    }
+                    return factorial;
+                });
+
+                const result = eval(expression);
+                addToHistory(display.value + ' = ' + result);
+                display.value = result;
+            } catch (error) {
+                display.value = 'Error';
+            }
+        }
+
+        function addToHistory(calculation) {
+            const historyList = document.getElementById('history-list');
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.textContent = calculation;
+            historyList.insertBefore(historyItem, historyList.firstChild);
+            
+            // Keep only last 10 calculations
+            while (historyList.children.length > 10) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        // Unit conversion rates
+        const conversionRates = {
+            length: {
+                m: 1,
+                km: 0.001,
+                cm: 100,
+                mm: 1000,
+                in: 39.3701,
+                ft: 3.28084,
+                yd: 1.09361,
+                mi: 0.000621371
+            },
+            weight: {
+                kg: 1,
+                g: 1000,
+                lb: 2.20462,
+                oz: 35.274,
+                ton: 0.001
+            },
+            temp: {
+                c: (val, to) => to === 'f' ? val * 9/5 + 32 : to === 'k' ? val + 273.15 : val,
+                f: (val, to) => to === 'c' ? (val - 32) * 5/9 : to === 'k' ? (val - 32) * 5/9 + 273.15 : val,
+                k: (val, to) => to === 'c' ? val - 273.15 : to === 'f' ? (val - 273.15) * 9/5 + 32 : val
+            }
+        };
+
+        // Approximate currency rates (for demonstration)
+        const currencyRates = {
+            USD: 1,
+            EUR: 0.85,
+            GBP: 0.73,
+            JPY: 110,
+            CNY: 6.45,
+            INR: 74.5,
+            CAD: 1.25,
+            AUD: 1.35
+        };
+
+        // Set up event listeners for conversions
+        function setupConverter(type) {
+            const fromInput = document.getElementById(`${type}-from`);
+            const fromUnit = document.getElementById(`${type}-from-unit`);
+            const toInput = document.getElementById(`${type}-to`);
+            const toUnit = document.getElementById(`${type}-to-unit`);
+
+            function convert() {
+                const value = parseFloat(fromInput.value) || 0;
+                const from = fromUnit.value;
+                const to = toUnit.value;
+
+                if (type === 'temp') {
+                    toInput.value = conversionRates.temp[from](value, to).toFixed(2);
+                } else if (type === 'currency') {
+                    const usdValue = value / currencyRates[from];
+                    toInput.value = (usdValue * currencyRates[to]).toFixed(2);
+                } else {
+                    const baseValue = value / conversionRates[type][from];
+                    toInput.value = (baseValue * conversionRates[type][to]).toFixed(6);
+                }
+            }
+
+            fromInput.addEventListener('input', convert);
+            fromUnit.addEventListener('change', convert);
+            toUnit.addEventListener('change', convert);
+        }
+
+        function swapUnits(type) {
+            const fromUnit = document.getElementById(`${type}-from-unit`);
+            const toUnit = document.getElementById(`${type}-to-unit`);
+            const fromInput = document.getElementById(`${type}-from`);
+            const toInput = document.getElementById(`${type}-to`);
+
+            // Swap units
+            const tempUnit = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = tempUnit;
+
+            // Swap values
+            fromInput.value = toInput.value;
+            toInput.value = '';
+
+            // Trigger conversion
+            fromInput.dispatchEvent(new Event('input'));
+        }
+
+        // Matrix operations
+        function createMatrix(matrixId) {
+            const rows = document.getElementById(`matrix-${matrixId}-rows`).value;
+            const cols = document.getElementById(`matrix-${matrixId}-cols`).value;
+            const container = document.getElementById(`matrix-${matrixId}`);
+
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'matrix-cell';
+                    input.id = `${matrixId}-${i}-${j}`;
+                    input.value = 0;
+                    container.appendChild(input);
+                }
+            }
+        }
+
+        function getMatrix(matrixId) {
+            const rows = document.getElementById(`matrix-${matrixId}-rows`).value;
+            const cols = document.getElementById(`matrix-${matrixId}-cols`).value;
+            const matrix = [];
+
+            for (let i = 0; i < rows; i++) {
+                matrix[i] = [];
+                for (let j = 0; j < cols; j++) {
+                    const value = parseFloat(document.getElementById(`${matrixId}-${i}-${j}`).value) || 0;
+                    matrix[i][j] = value;
+                }
+            }
+            return matrix;
+        }
+
+        function displayMatrix(matrix, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            if (!matrix) {
+                container.innerHTML = '<div class="error">Invalid operation</div>';
+                return;
+            }
+
+            container.style.gridTemplateColumns = `repeat(${matrix[0].length}, 1fr)`;
+            
+            for (let i = 0; i < matrix.length; i++) {
+                for (let j = 0; j < matrix[i].length; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.style.background = '#e3f2fd';
+                    cell.textContent = matrix[i][j].toFixed(2);
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function matrixOperation(operation) {
+            const matrixA = getMatrix('a');
+            const matrixB = getMatrix('b');
+            let result = null;
+
+            switch (operation) {
+                case 'add':
+                    if (matrixA.length === matrixB.length && matrixA[0].length === matrixB[0].length) {
+                        result = matrixA.map((row, i) => row.map((val, j) => val + matrixB[i][j]));
+                    }
+                    break;
+                case 'subtract':
+                    if (matrixA.length === matrixB.length && matrixA[0].length === matrixB[0].length) {
+                        result = matrixA.map((row, i) => row.map((val, j) => val - matrixB[i][j]));
+                    }
+                    break;
+                case 'multiply':
+                    if (matrixA[0].length === matrixB.length) {
+                        result = [];
+                        for (let i = 0; i < matrixA.length; i++) {
+                            result[i] = [];
+                            for (let j = 0; j < matrixB[0].length; j++) {
+                                result[i][j] = 0;
+                                for (let k = 0; k < matrixB.length; k++) {
+                                    result[i][j] += matrixA[i][k] * matrixB[k][j];
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 'determinant':
+                    if (matrixA.length === matrixA[0].length) {
+                        const det = calculateDeterminant(matrixA);
+                        result = [[det]];
+                    }
+                    break;
+            }
+
+            displayMatrix(result, 'matrix-result');
+        }
+
+        function calculateDeterminant(matrix) {
+            const n = matrix.length;
+            if (n === 1) return matrix[0][0];
+            if (n === 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+            
+            let det = 0;
+            for (let i = 0; i < n; i++) {
+                const subMatrix = [];
+                for (let j = 1; j < n; j++) {
+                    const row = [];
+                    for (let k = 0; k < n; k++) {
+                        if (k !== i) row.push(matrix[j][k]);
+                    }
+                    subMatrix.push(row);
+                }
+                det += (i % 2 === 0 ? 1 : -1) * matrix[0][i] * calculateDeterminant(subMatrix);
+            }
+            return det;
+        }
+
+        // Initialize converters
+        setupConverter('length');
+        setupConverter('weight');
+        setupConverter('temp');
+        setupConverter('currency');
+
+        // Initialize matrices
+        createMatrix('a');
+        createMatrix('b');
+
+        // Keyboard support
+        document.addEventListener('keydown', function(event) {
+            if (document.getElementById('calculator').classList.contains('active')) {
+                const display = document.getElementById('display');
+                if (display === document.activeElement) {
+                    switch(event.key) {
+                        case 'Enter':
+                            event.preventDefault();
+                            calculate();
+                            break;
+                        case 'Escape':
+                            clearDisplay();
+                            break;
+                        case 'Backspace':
+                            if (event.ctrlKey) {
+                                clearDisplay();
+                            }
+                            break;
+                    }
+                }
+            }
+        });
+
+        // Advanced mathematical functions
+        function addAdvancedFunctions() {
+            // Add more scientific functions
+            const advancedGrid = document.createElement('div');
+            advancedGrid.className = 'calculator-grid';
+            advancedGrid.style.marginTop = '20px';
+            
+            const functions = [
+                {text: 'asin', func: 'asin('},
+                {text: 'acos', func: 'acos('},
+                {text: 'atan', func: 'atan('},
+                {text: '10^x', func: 'pow(10,'},
+                {text: 'x²', func: '^2'},
+                {text: '1/x', func: '1/('},
+                {text: 'abs', func: 'abs('},
+                {text: 'ceil', func: 'ceil('},
+                {text: 'floor', func: 'floor('},
+                {text: 'round', func: 'round('}
+            ];
+
+            functions.forEach(fn => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-function';
+                btn.textContent = fn.text;
+                btn.onclick = () => addToDisplay(fn.func);
+                advancedGrid.appendChild(btn);
+            });
+
+            document.getElementById('calculator').appendChild(advancedGrid);
+        }
+
+        // Statistical functions
+        function calculateStatistics(numbers) {
+            const n = numbers.length;
+            const sum = numbers.reduce((a, b) => a + b, 0);
+            const mean = sum / n;
+            const variance = numbers.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / n;
+            const stdDev = Math.sqrt(variance);
+            const sorted = [...numbers].sort((a, b) => a - b);
+            const median = n % 2 === 0 ? (sorted[n/2 - 1] + sorted[n/2]) / 2 : sorted[Math.floor(n/2)];
+            
+            return {
+                count: n,
+                sum: sum,
+                mean: mean,
+                median: median,
+                variance: variance,
+                stdDev: stdDev,
+                min: Math.min(...numbers),
+                max: Math.max(...numbers)
+            };
+        }
+
+        // Enhanced calculator with more functions
+        function enhanceCalculator() {
+            const display = document.getElementById('display');
+            const originalCalculate = calculate;
+            
+            calculate = function() {
+                let expression = display.value.trim();
+                
+                try {
+                    // Handle statistical functions
+                    if (expression.includes('stats(')) {
+                        const match = expression.match(/stats\(([^)]+)\)/);
+                        if (match) {
+                            const numbers = match[1].split(',').map(n => parseFloat(n.trim()));
+                            const stats = calculateStatistics(numbers);
+                            display.value = JSON.stringify(stats, null, 2);
+                            return;
+                        }
+                    }
+                    
+                    // Handle combinations and permutations
+                    expression = expression.replace(/C\((\d+),(\d+)\)/g, (match, n, r) => {
+                        return factorial(parseInt(n)) / (factorial(parseInt(r)) * factorial(parseInt(n) - parseInt(r)));
+                    });
+                    
+                    expression = expression.replace(/P\((\d+),(\d+)\)/g, (match, n, r) => {
+                        return factorial(parseInt(n)) / factorial(parseInt(n) - parseInt(r));
+                    });
+                    
+                    // Enhanced mathematical constants and functions
+                    expression = expression.replace(/pi/g, Math.PI);
+                    expression = expression.replace(/e(?![a-zA-Z])/g, Math.E);
+                    expression = expression.replace(/sin\(/g, 'Math.sin(');
+                    expression = expression.replace(/cos\(/g, 'Math.cos(');
+                    expression = expression.replace(/tan\(/g, 'Math.tan(');
+                    expression = expression.replace(/asin\(/g, 'Math.asin(');
+                    expression = expression.replace(/acos\(/g, 'Math.acos(');
+                    expression = expression.replace(/atan\(/g, 'Math.atan(');
+                    expression = expression.replace(/log\(/g, 'Math.log10(');
+                    expression = expression.replace(/ln\(/g, 'Math.log(');
+                    expression = expression.replace(/sqrt\(/g, 'Math.sqrt(');
+                    expression = expression.replace(/abs\(/g, 'Math.abs(');
+                    expression = expression.replace(/ceil\(/g, 'Math.ceil(');
+                    expression = expression.replace(/floor\(/g, 'Math.floor(');
+                    expression = expression.replace(/round\(/g, 'Math.round(');
+                    expression = expression.replace(/pow\(/g, 'Math.pow(');
+                    expression = expression.replace(/\^/g, '**');
+                    
+                    // Handle factorial
+                    expression = expression.replace(/(\d+)!/g, (match, num) => {
+                        return factorial(parseInt(num));
+                    });
+                    
+                    // Handle degrees to radians conversion for trig functions
+                    expression = expression.replace(/Math\.(sin|cos|tan)\(([^)]+)deg\)/g, (match, func, angle) => {
+                        return `Math.${func}(${angle} * Math.PI / 180)`;
+                    });
+
+                    const result = eval(expression);
+                    addToHistory(display.value + ' = ' + result);
+                    display.value = result;
+                } catch (error) {
+                    display.value = 'Error: ' + error.message;
+                }
+            };
+        }
+
+        function factorial(n) {
+            if (n < 0) return NaN;
+            if (n === 0 || n === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) {
+                result *= i;
+            }
+            return result;
+        }
+
+        // Number base converter
+        function addBaseConverter() {
+            const baseSection = document.createElement('div');
+            baseSection.className = 'converter-section';
+            baseSection.innerHTML = `
+                <h3>Number Base Converter</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="input-group">
+                        <label>Input Number:</label>
+                        <input type="text" id="base-input" placeholder="Enter number">
+                        <select id="base-from">
+                            <option value="10">Decimal (Base 10)</option>
+                            <option value="2">Binary (Base 2)</option>
+                            <option value="8">Octal (Base 8)</option>
+                            <option value="16">Hexadecimal (Base 16)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Output:</label>
+                        <input type="text" id="base-output" readonly>
+                        <select id="base-to">
+                            <option value="2">Binary (Base 2)</option>
+                            <option value="8">Octal (Base 8)</option>
+                            <option value="10">Decimal (Base 10)</option>
+                            <option value="16">Hexadecimal (Base 16)</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('converter').appendChild(baseSection);
+            
+            function convertBase() {
+                const input = document.getElementById('base-input').value;
+                const fromBase = parseInt(document.getElementById('base-from').value);
+                const toBase = parseInt(document.getElementById('base-to').value);
+                const output = document.getElementById('base-output');
+                
+                try {
+                    const decimal = parseInt(input, fromBase);
+                    if (isNaN(decimal)) {
+                        output.value = 'Invalid input';
+                        return;
+                    }
+                    output.value = decimal.toString(toBase).toUpperCase();
+                } catch (error) {
+                    output.value = 'Error';
+                }
+            }
+            
+            document.getElementById('base-input').addEventListener('input', convertBase);
+            document.getElementById('base-from').addEventListener('change', convertBase);
+            document.getElementById('base-to').addEventListener('change', convertBase);
+        }
+
+        // Physics calculations
+        function addPhysicsCalculators() {
+            const physicsSection = document.createElement('div');
+            physicsSection.className = 'converter-section';
+            physicsSection.innerHTML = `
+                <h3>Physics Calculators</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4>Velocity Calculator</h4>
+                        <input type="number" id="distance" placeholder="Distance (m)">
+                        <input type="number" id="time" placeholder="Time (s)">
+                        <button class="btn btn-function" onclick="calculateVelocity()">Calculate Velocity</button>
+                        <div id="velocity-result"></div>
+                    </div>
+                    <div>
+                        <h4>Force Calculator (F = ma)</h4>
+                        <input type="number" id="mass" placeholder="Mass (kg)">
+                        <input type="number" id="acceleration" placeholder="Acceleration (m/s²)">
+                        <button class="btn btn-function" onclick="calculateForce()">Calculate Force</button>
+                        <div id="force-result"></div>
+                    </div>
+                    <div>
+                        <h4>Energy Calculator (KE = ½mv²)</h4>
+                        <input type="number" id="ke-mass" placeholder="Mass (kg)">
+                        <input type="number" id="velocity" placeholder="Velocity (m/s)">
+                        <button class="btn btn-function" onclick="calculateKineticEnergy()">Calculate KE</button>
+                        <div id="energy-result"></div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('converter').appendChild(physicsSection);
+        }
+
+        function calculateVelocity() {
+            const distance = parseFloat(document.getElementById('distance').value);
+            const time = parseFloat(document.getElementById('time').value);
+            const result = distance / time;
+            document.getElementById('velocity-result').innerHTML = `<strong>Velocity: ${result.toFixed(2)} m/s</strong>`;
+        }
+
+        function calculateForce() {
+            const mass = parseFloat(document.getElementById('mass').value);
+            const acceleration = parseFloat(document.getElementById('acceleration').value);
+            const result = mass * acceleration;
+            document.getElementById('force-result').innerHTML = `<strong>Force: ${result.toFixed(2)} N</strong>`;
+        }
+
+        function calculateKineticEnergy() {
+            const mass = parseFloat(document.getElementById('ke-mass').value);
+            const velocity = parseFloat(document.getElementById('velocity').value);
+            const result = 0.5 * mass * velocity * velocity;
+            document.getElementById('energy-result').innerHTML = `<strong>Kinetic Energy: ${result.toFixed(2)} J</strong>`;
+        }
+
+        // Initialize all features
+        window.onload = function() {
+            enhanceCalculator();
+            addAdvancedFunctions();
+            addBaseConverter();
+            addPhysicsCalculators();
+            
+            // Set focus to calculator display
+            document.getElementById('display').focus();
+        };
+    </script>
+</body>
+</html>
